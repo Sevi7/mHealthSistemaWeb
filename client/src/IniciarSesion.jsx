@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,16 +9,16 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import loginImage from './loginImage.jpeg';
 import axios from 'axios';
-import Common from './utils/Common.js';
+import loginImage from './loginImage.jpeg';
+import Common from './utils/Common';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '100vh',
   },
   image: {
-    backgroundImage: 'url(' + loginImage + ')',
+    backgroundImage: `url(${loginImage})`,
     backgroundRepeat: 'no-repeat',
     backgroundColor:
       theme.palette.type === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
@@ -47,54 +47,54 @@ const useStyles = makeStyles((theme) => ({
   },
   errmsg: {
     color: 'red',
-    textAlign: 'center'
-  }
+    textAlign: 'center',
+  },
 }));
 
 export default function App() {
-  const [mensaje, setMensaje] = useState('')
-  const [email, setEmail] = useState('')
-  const [contraseña, setContraseña] = useState('')
-  const [errors, setErrors] = useState({})
+  const [mensaje, setMensaje] = useState('');
+  const [email, setEmail] = useState('');
+  const [contraseña, setContraseña] = useState('');
+  const [errors, setErrors] = useState({});
 
-  const classes = useStyles()
+  const classes = useStyles();
 
   const validarEmail = () => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
-  }
-  
+  };
+
   const validacionDatosInicioSesion = () => {
-    let errorsValidation = {}
-    if (email === '') errorsValidation.email = 'Este campo no puede estar vacío'
-    else if (!validarEmail()) errorsValidation.email = 'El valor introducido en el campo Email no tiene un formato válido'
-    if (contraseña === '') errorsValidation.contraseña = 'Este campo no puede estar vacío'
+    const errorsValidation = {};
+    if (email === '') errorsValidation.email = 'Este campo no puede estar vacío';
+    else if (!validarEmail()) errorsValidation.email = 'El valor introducido en el campo Email no tiene un formato válido';
+    if (contraseña === '') errorsValidation.contraseña = 'Este campo no puede estar vacío';
     return errorsValidation;
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.persist();
     event.preventDefault();
-    let errorsValidation = await validacionDatosInicioSesion();
+    const errorsValidation = await validacionDatosInicioSesion();
     if (Object.keys(errorsValidation).length !== 0) {
       setErrors(errorsValidation);
     } else {
       try {
-        let res = await axios.post('/iniciarSesion', { email: email, contraseña: contraseña });
-        Common.setSesionUsuario(res.data.usuarioId, res.data.token, res.data.expiraEn)
-        window.location.replace('/inicio')
+        const res = await axios.post('/iniciarSesion', { email, contraseña });
+        Common.setSesionUsuario(res.data.usuarioId, res.data.token, res.data.expiraEn);
+        window.location.replace('/dashboard');
       } catch (err) {
         if (err.response.status === 400) {
-          setErrors({})
+          setErrors({});
           setMensaje(err.response.data.err.message);
         } else {
-          console.log(err)
-          setErrors({})
-          setMensaje("Algo fue mal. Por favor intentelo de nuevo más tarde");
+          console.log(err);
+          setErrors({});
+          setMensaje('Algo fue mal. Por favor intentelo de nuevo más tarde');
         }
       }
     }
-  }
+  };
 
   return (
     <Grid container component="main" className={classes.root}>
@@ -121,7 +121,7 @@ export default function App() {
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
               helperText={errors.email}
             />
@@ -134,7 +134,7 @@ export default function App() {
               type="password"
               autoComplete="current-password"
               value={contraseña}
-              onChange={e => setContraseña(e.target.value)}
+              onChange={(e) => setContraseña(e.target.value)}
               error={errors.contraseña}
               helperText={errors.contraseña}
             />
@@ -147,21 +147,22 @@ export default function App() {
             >
               Iniciar Sesión
             </Button>
-            <br /><br />
+            <br />
+            <br />
             <Grid container spacing={3} className={classes.grid}>
-              <Grid item xs={12} >
-                <Link exact href="/registroUsuario" variant="body2">
-                  {"Registro Usuario"}
+              <Grid item xs={12}>
+                <Link href="/registroUsuario" variant="body2">
+                  Registro Usuario
                 </Link>
               </Grid>
               <Grid item xs={12}>
                 <Link href="#" variant="body2">
-                  {"Registro Personal Sanitario"}
+                  Registro Personal Sanitario
                 </Link>
               </Grid>
               <Grid item xs={12}>
                 <Link href="#" variant="body2">
-                  {"He olvidado la contraseña"}
+                  He olvidado la contraseña
                 </Link>
               </Grid>
             </Grid>

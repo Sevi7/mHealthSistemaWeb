@@ -1,0 +1,38 @@
+export default {
+  nombre: {
+    frecuenciaCardiaca: 'frecuenciaCardiaca',
+    temperatura: 'temperatura',
+    peso: 'peso',
+    presionArterial: 'presionArterial',
+    glucemia: 'glucemia',
+    saturacionOxigeno: 'saturacionOxigeno',
+    default: 'default',
+  },
+  titulo: {
+    frecuenciaCardiaca: 'Frecuencia Cardiaca',
+    temperatura: 'Temperatura',
+    peso: 'Peso',
+    presionArterial: 'Presión Arterial',
+    glucemia: 'Glucemia',
+    saturacionOxigeno: 'Saturación Oxígeno',
+    default: 'mHealth',
+  },
+  tituloGrafico: {
+    frecuenciaCardiaca: 'Frecuencia Cardiaca (PPM)',
+    temperatura: 'Temperatura (°C)',
+    peso: 'Peso (Kg)',
+    presionArterial: 'Presión Arterial (mmHg)',
+    glucemia: 'Glucemia (mg/dL)',
+    saturacionOxigeno: 'Saturación Oxígeno (SpO2)',
+    default: '',
+  },
+  rangoVisual: {
+    frecuenciaCardiaca: [0, 175],
+    temperatura: [],
+    peso: [],
+    presionArterial: [],
+    glucemia: [],
+    saturacionOxigeno: [],
+    default: [null, null],
+  },
+};
