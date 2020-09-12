@@ -9,4 +9,8 @@ export default {
     const res = await axios.get(`/medicionConstanteVital/frecuenciaCardiaca?fecha=${fecha}`);
     return res.data;
   },
+  getTemperatura: async (fecha) => {
+    const res = await axios.get(`/medicionConstanteVital/temperatura?fecha=${fecha}`);
+    return res.data;
+  },
 };

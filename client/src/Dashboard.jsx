@@ -37,6 +37,7 @@ import MomentUtils from '@date-io/moment';
 import PropTypes from 'prop-types';
 import GraficoSpline from './componentes/GraficoSpline.jsx';
 import FrecuenciaCardiacaBluetooth from './componentes/webBluetooth/FrecuenciaCardiacaBluetooth.jsx';
+import TemperaturaBluetooth from './componentes/webBluetooth/TemperaturaBluetooth.jsx';
 import constantesVitales from './utils/constantesVitales';
 import medicionConstanteVitalService from './services/medicionConstanteVitalService';
 
@@ -173,11 +174,27 @@ const Dashboard = (props) => {
     ]);
   };
 
+  const refrescarTemperaturaMediciones = (nuevasMediciones) => {
+    const nuevasMedicionesFormateadas = nuevasMediciones.map((medicion) => ({
+      valor: medicion.valor,
+      fecha: formatearFecha(medicion.fecha),
+    }));
+    setMediciones((mediciones) => [
+      ...mediciones,
+      ...nuevasMedicionesFormateadas,
+    ]);
+  };
+
+  const handleInicio = () => {
+    setConstanteVital(constantesVitales.nombre.default);
+  };
+
   const handleFrecuenciaCardiaca = () => {
     setConstanteVital(constantesVitales.nombre.frecuenciaCardiaca);
   };
-  const handleInicio = () => {
-    setConstanteVital(constantesVitales.nombre.default);
+
+  const handleTemperatura = () => {
+    setConstanteVital(constantesVitales.nombre.temperatura);
   };
 
   useEffect(() => {
@@ -185,6 +202,8 @@ const Dashboard = (props) => {
     (async () => {
       if (constanteVital === constantesVitales.nombre.frecuenciaCardiaca) {
         medicionesAPI = await medicionConstanteVitalService.getFrecuenciaCardiaca(fechaMediciones);
+      } else if (constanteVital === constantesVitales.nombre.temperatura) {
+        medicionesAPI = await medicionConstanteVitalService.getTemperatura(fechaMediciones);
       }
       setMediciones(medicionesAPI);
     })();
@@ -196,13 +215,21 @@ const Dashboard = (props) => {
     setRangoVisual(constantesVitales.rangoVisual[constanteVital]);
   }, [constanteVital]);
 
-  useEffect(() => {}, [usuarioHizoClick]);
+  useEffect(() => { }, [usuarioHizoClick]);
 
   const getComponenteBluetooth = () => {
     if (constanteVital === constantesVitales.nombre.frecuenciaCardiaca) {
       return (
         <FrecuenciaCardiacaBluetooth
           refrescarFrecuenciaCardiacaMediciones={refrescarFrecuenciaCardiacaMediciones}
+          resetearBotonConectar={resetearBotonConectar}
+        />
+      );
+    }
+    if (constanteVital === constantesVitales.nombre.temperatura) {
+      return (
+        <TemperaturaBluetooth
+          refrescarTemperaturaMediciones={refrescarTemperaturaMediciones}
           resetearBotonConectar={resetearBotonConectar}
         />
       );
@@ -224,7 +251,7 @@ const Dashboard = (props) => {
         </ListItemIcon>
         <ListItemText primary="Frecuencia Cardiaca" />
       </ListItem>
-      <ListItem button>
+      <ListItem button onClick={handleTemperatura}>
         <ListItemIcon>
           <Icon icon={thermometerIcon} width="1.8em" height="1.8em" />
         </ListItemIcon>

@@ -37,7 +37,7 @@ module.exports = (app) => {
       // Genera el token de autenticación
       const payload = {
         usuarioId: usuarioDB.id,
-        expiraFecha: moment().add(120, 'minutes').unix(),
+        expiraFecha: moment().local().add(120, 'minutes').unix(),
       };
       const token = jwt.encode(payload, config.TOKEN_KEY);
 

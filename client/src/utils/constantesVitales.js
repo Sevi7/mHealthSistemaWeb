@@ -28,7 +28,7 @@ export default {
   },
   rangoVisual: {
     frecuenciaCardiaca: [0, 175],
-    temperatura: [],
+    temperatura: [0, 40],
     peso: [],
     presionArterial: [],
     glucemia: [],

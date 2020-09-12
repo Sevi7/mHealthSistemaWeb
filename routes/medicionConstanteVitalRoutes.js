@@ -46,14 +46,6 @@ routerMCV.delete('/:id', async (req, res) => {
   });
 });
 
-routerMCV.post('/temperatura', async (req, res) => {
-  const temperatura = await Temperatura.create({ usuario: req.usuarioId, valor: req.body.valor });
-  return res.status(201).send({
-    error: false,
-    temperatura,
-  });
-});
-
 routerMCV.post('/peso', async (req, res) => {
   const peso = await Peso.create({ usuario: req.usuarioId, valor: req.body.valor });
   return res.status(201).send({
@@ -61,6 +53,26 @@ routerMCV.post('/peso', async (req, res) => {
     peso,
   });
 });
+
+const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
+
+const formatearFecha = (fecha) => {
+  const fechaObjeto = new Date(fecha);
+  return añadirCeroCuandoMenorADiez(fechaObjeto.getHours())
+    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getMinutes())
+    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getSeconds());
+};
+
+const getFechaYSiguienteDiaEnSeg = (fechaString) => {
+  const fechaStringPartes = fechaString.split('/');
+  let fecha = new Date(fechaStringPartes[2], fechaStringPartes[1] - 1, fechaStringPartes[0]);
+  fecha = new Date(fecha.getTime() + Math.abs(fecha.getTimezoneOffset() * 60000));
+  const minFecha = fecha.getTime();
+  fecha.setDate(fecha.getDate() + 1);
+  const maxFecha = fecha.getTime();
+
+  return { minFecha, maxFecha };
+};
 
 routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
@@ -75,37 +87,49 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   }
 
   await Promise.all(resultados);
-
   return res.status(201).send({
     error: false,
     valores,
   });
 });
 
-const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
-
-const formatearFecha = (fecha) => {
-  const fechaObjeto = new Date(fecha);
-  return añadirCeroCuandoMenorADiez(fechaObjeto.getHours())
-    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getMinutes())
-    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getSeconds());
-};
-
 routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
-  const fechaString = req.query.fecha;
-  const fechaStringPartes = fechaString.split('/');
-  let fecha = new Date(fechaStringPartes[2], fechaStringPartes[1] - 1, fechaStringPartes[0]);
-  fecha = new Date(fecha.getTime() + Math.abs(fecha.getTimezoneOffset() * 60000));
-  const minFecha = fecha.getTime();
-  fecha.setDate(fecha.getDate() + 1);
-  const maxFecha = fecha.getTime();
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
   let mediciones = await FrecuenciaCardiaca.find({
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor, fecha: formatearFecha(medicion.fecha), enReposo: medicion.enReposo,
   }));
-  console.log(mediciones);
+  return res.status(200).send(mediciones);
+});
+
+routerMCV.post('/temperatura', async (req, res) => {
+  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  const resultados = [];
+  for (const temperatura of valores) {
+    resultados.push(await Temperatura.create({
+      usuario: req.usuarioId,
+      valor: temperatura.valor,
+      fecha: temperatura.fecha,
+    }));
+  }
+
+  await Promise.all(resultados);
+  return res.status(201).send({
+    error: false,
+    valores,
+  });
+});
+
+routerMCV.get('/temperatura', async (req, res) => {
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
+  let mediciones = await Temperatura.find({
+    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+  });
+  mediciones = mediciones.map((medicion) => ({
+    valor: medicion.valor, fecha: formatearFecha(medicion.fecha),
+  }));
   return res.status(200).send(mediciones);
 });
 

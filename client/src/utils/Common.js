@@ -3,7 +3,7 @@ const moment = require('moment');
 const setSesionUsuario = (usuarioID, token, expiraEn) => {
   sessionStorage.setItem('usuarioID', usuarioID);
   sessionStorage.setItem('token', token);
-  const expiraFecha = moment().add(expiraEn, 'seconds');
+  const expiraFecha = moment().local().add(expiraEn, 'seconds');
   sessionStorage.setItem('expiraFecha', expiraFecha);
 };
 
@@ -26,9 +26,9 @@ const getExpiraFecha = () => {
   return moment(expiraFecha, 'ddd MMM DD YYYY HH:mm:ss Z');
 };
 
-const sesionIniciada = () => moment().isBefore(getExpiraFecha());
+const sesionIniciada = () => moment().local().isBefore(getExpiraFecha());
 
-const getFechaHoy = () => moment().format('DD/MM/YYYY');
+const getFechaHoy = () => moment().local().format('DD/MM/YYYY');
 
 module.exports = {
   setSesionUsuario,

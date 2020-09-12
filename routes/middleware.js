@@ -20,7 +20,7 @@ const comprobarToken = (req, res, next) => {
       err: 'Token inválido',
     });
   }
-  if (moment().unix() > payload.expiraFecha) {
+  if (moment().local().unix() > payload.expiraFecha) {
     return res.json({
       ok: false,
       err: 'Token expirado',
