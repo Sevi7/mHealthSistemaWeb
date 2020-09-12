@@ -1,6 +1,8 @@
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-bitwise */
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import * as webBluetooth from './webBluetooth';
 
 const FrecuenciaCardiacaBluetooth = (props) => {
   const frecuenciaCardiacaMediciones = [];
@@ -124,18 +126,13 @@ const FrecuenciaCardiacaBluetooth = (props) => {
     return frecuenciaCardiaca;
   };
 
+  props.resetearBotonConectar();
   (async () => {
-    props.resetearBotonConectar();
-    const dispositivo = await navigator.bluetooth.requestDevice({
-      filters: [{
-        services: ['heart_rate'],
-      }],
-    });
-    console.log('dispositivo: ', dispositivo);
-    const servidor = await dispositivo.gatt.connect();
-    console.log('servidor: ', servidor);
-    const servicio = await servidor.getPrimaryService('heart_rate');
-    await Promise.all([getZonaCuerpoMedida(servicio), getFrecuenciaCardiaca(servicio)]);
+    const servicioFrecuenciaCardiaca = await webBluetooth.conectarBluetoothGetServicio('heart_rate');
+    await Promise.all([
+      getZonaCuerpoMedida(servicioFrecuenciaCardiaca),
+      getFrecuenciaCardiaca(servicioFrecuenciaCardiaca),
+    ]);
   })();
   return (null);
 };

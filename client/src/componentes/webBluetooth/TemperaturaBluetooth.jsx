@@ -1,7 +1,9 @@
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-bitwise */
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import * as webBluetooth from './webBluetooth';
 
 const TemperaturaBluetooth = (props) => {
   const temperaturaMediciones = [];
@@ -54,20 +56,11 @@ const TemperaturaBluetooth = (props) => {
   };
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  props.resetearBotonConectar();
   (async () => {
-    props.resetearBotonConectar();
-    const dispositivo = await navigator.bluetooth.requestDevice({
-      filters: [{
-        services: ['health_thermometer'],
-      }],
-    });
-    console.log('dispositivo: ', dispositivo);
-    const servidor = await dispositivo.gatt.connect();
-    console.log('servidor: ', servidor);
-    const servicio = await servidor.getPrimaryService('health_thermometer');
-    console.log('servicio: ', servicio);
+    const servicioTemperatura = await webBluetooth.conectarBluetoothGetServicio('health_thermometer');
     while (true) {
-      await getTemperatura(servicio);
+      await getTemperatura(servicioTemperatura);
       await sleep(1000);
     }
   })();
