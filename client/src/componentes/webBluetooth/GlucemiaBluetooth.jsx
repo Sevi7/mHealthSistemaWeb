@@ -36,7 +36,7 @@ const GlucemiaBluetooth = (props) => {
       const glucemiaFecha = {
         valor: glucemiaMgDl,
         fecha,
-        postprandial: false,
+        postprandial: props.checkbox,
       };
       console.log('Glucemia', glucemiaFecha);
       enviarGlucemia(glucemiaFecha).then(null);

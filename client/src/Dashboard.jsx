@@ -32,6 +32,8 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 import MomentUtils from '@date-io/moment';
@@ -138,9 +140,14 @@ const Dashboard = (props) => {
   const [tituloGrafico, setTituloGrafico] = useState(null);
   const [rangoVisual, setRangoVisual] = useState([null, null]);
   const [dataFormat, setDataFormat] = useState([]);
+  const [checkbox, setCheckbox] = useState(false);
   const [open, setOpen] = useState(true);
 
   const classes = useStyles();
+
+  const handleCheckbox = (event) => {
+    setCheckbox(event.target.checked);
+  };
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -170,7 +177,7 @@ const Dashboard = (props) => {
     const nuevasMedicionesFormateadas = nuevasMediciones.map((medicion) => ({
       valor: medicion.valor,
       fecha: formatearFecha(medicion.fecha),
-      enReposo: true,
+      enReposo: medicion.enReposo,
     }));
     setMediciones((mediciones) => [
       ...mediciones,
@@ -264,6 +271,7 @@ const Dashboard = (props) => {
         <FrecuenciaCardiacaBluetooth
           refrescarFrecuenciaCardiacaMediciones={refrescarFrecuenciaCardiacaMediciones}
           resetearBotonConectar={resetearBotonConectar}
+          checkbox={checkbox}
         />
       );
     }
@@ -288,6 +296,7 @@ const Dashboard = (props) => {
         <GlucemiaBluetooth
           refrescarGlucemiaMediciones={refrescarGlucemiaMediciones}
           resetearBotonConectar={resetearBotonConectar}
+          checkbox={checkbox}
         />
       );
     }
@@ -431,6 +440,21 @@ const Dashboard = (props) => {
                       >
                         Conectar
                       </Button>
+                    )}
+                  {fechaMediciones === fechaHoy && constantesVitales.checkbox[constanteVital]
+                    && (
+                      <FormControlLabel
+                        control={(
+                          <Checkbox
+                            checked={checkbox}
+                            onChange={handleCheckbox}
+                            name="checkedB"
+                            color="secondary"
+                          />
+                        )}
+                        label={constantesVitales.checkbox[constanteVital]}
+                      />
+
                     )}
                   {usuarioHizoClick
                     && getComponenteBluetooth()}

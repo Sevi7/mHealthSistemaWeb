@@ -11,6 +11,7 @@ import {
   Legend,
   Margin,
   Tooltip,
+  SeriesTemplate,
 } from 'devextreme-react/chart';
 import PropTypes from 'prop-types';
 
@@ -33,16 +34,22 @@ const GraficoSpline = (props) => {
           <Grid visible />
         </CommonAxisSettings>
 
-        {
-          dataFormat.map((serie) => (
+        {dataFormat[0] && dataFormat[0].filter
+          && (
+            <SeriesTemplate
+              nameField={dataFormat[0].filter}
+              customizeSeries={(seriesName) => (seriesName === true ? { name: dataFormat[0].filterTrue, valueField: 'valor' } : { name: dataFormat[0].filterFalse, valueField: 'valor' })}
+            />
+          )}
+        { dataFormat[0] && !dataFormat[0].filter
+          && dataFormat.map((serie) => (
             <Series
               valueField={serie.value}
               key={serie.name}
               name={serie.name}
               showInLegend={dataFormat.length > 1}
             />
-          ))
-        }
+          ))}
 
         <Margin bottom={20} />
         <ValueAxis
@@ -74,6 +81,9 @@ GraficoSpline.propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       value: PropTypes.string,
+      filter: PropTypes.string,
+      filterTrue: PropTypes.string,
+      filterFalse: PropTypes.string,
     }),
   ).isRequired,
   titulo: PropTypes.string.isRequired,

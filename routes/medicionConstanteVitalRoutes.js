@@ -75,7 +75,7 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
       usuario: req.usuarioId,
       valor: frecuenciaCardiaca.valor,
       fecha: frecuenciaCardiaca.fecha,
-      enReposo: true,
+      enReposo: frecuenciaCardiaca.enReposo,
     }));
   }
 
@@ -164,7 +164,7 @@ routerMCV.post('/glucemia', async (req, res) => {
       usuario: req.usuarioId,
       valor: glucemia.valor,
       fecha: glucemia.fecha,
-      postprandial: false,
+      postprandial: glucemia.postprandial,
     }));
   }
 

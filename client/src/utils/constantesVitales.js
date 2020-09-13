@@ -27,9 +27,15 @@ export default {
     glucemia: [0, 400],
     default: [null, null],
   },
+  checkbox: {
+    frecuenciaCardiaca: 'En Reposo',
+    glucemia: 'Postprandial',
+  },
   dataFormat: {
     frecuenciaCardiaca: [
-      { name: 'Frecuencia Cardiaca', value: 'valor' },
+      {
+        name: 'Frecuencia Cardiaca', value: 'valor', filter: 'enReposo', filterTrue: 'Reposo', filterFalse: 'Ejercicio',
+      },
     ],
     temperatura: [
       { name: 'Temperatura', value: 'valor' },
@@ -39,7 +45,9 @@ export default {
       { name: 'Diastólica', value: 'diastolica' },
     ],
     glucemia: [
-      { name: 'Glucemia', value: 'valor' },
+      {
+        name: 'Glucemia', value: 'valor', filter: 'postprandial', filterTrue: 'Postprandial', filterFalse: 'Ayuno',
+      },
     ],
     default: [],
   },
