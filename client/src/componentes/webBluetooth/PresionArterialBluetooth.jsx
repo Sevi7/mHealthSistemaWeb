@@ -6,18 +6,10 @@ import PropTypes from 'prop-types';
 import * as webBluetooth from './webBluetooth';
 
 const PresionArterialBluetooth = (props) => {
-  const presionArterialMediciones = [];
-
-  const guardarPresionArterialYEnviar = async (presionArterial) => {
-    presionArterialMediciones.push(presionArterial);
-    if (presionArterialMediciones.length === 5) {
-      const resEnviar = await axios.post('/medicionConstanteVital/presionArterial', { valores: presionArterialMediciones });
-      const presionArterialMedicionesRefrescar = presionArterialMediciones.slice();
-      props.refrescarPresionArterialMediciones(presionArterialMedicionesRefrescar);
-      presionArterialMediciones.splice(0, presionArterialMediciones.length);
-      return resEnviar;
-    }
-    return presionArterialMediciones;
+  const enviarPresionArterial = async (presionArterial) => {
+    const resEnviar = await axios.post('/medicionConstanteVital/presionArterial', { valores: [presionArterial] });
+    props.refrescarPresionArterialMediciones([presionArterial]);
+    return resEnviar;
   };
 
   const handleCaracteristicaPresionArterial = async (caracteristica) => {
@@ -32,8 +24,10 @@ const PresionArterialBluetooth = (props) => {
 
     try {
       const flags = presionArterialData.getUint8(0);
-      const presionArterialSistolica = presionArterialData.getUint8(1);
-      const presionArterialDiastolica = presionArterialData.getUint8(2);
+      const presionArterialSistolicaField = presionArterialData.getUint16(1);
+      const presionArterialDiastolicaField = presionArterialData.getUint16(3);
+      const presionArterialSistolica = webBluetooth.sfloatToFloat(presionArterialSistolicaField);
+      const presionArterialDiastolica = webBluetooth.sfloatToFloat(presionArterialDiastolicaField);
       const fecha = new Date().getTime();
       const presionArterialFecha = {
         valor: presionArterialSistolica,
@@ -41,7 +35,7 @@ const PresionArterialBluetooth = (props) => {
         fecha,
       };
       console.log('PresionArterial', presionArterialFecha);
-      guardarPresionArterialYEnviar(presionArterialFecha).then(null);
+      enviarPresionArterial(presionArterialFecha).then(null);
       return presionArterialFecha;
     } catch (error) {
       console.log(error);
@@ -63,7 +57,7 @@ const PresionArterialBluetooth = (props) => {
     const servicioPresionArterial = await webBluetooth.conectarBluetoothGetServicio('blood_pressure');
     while (true) {
       await getPresionArterial(servicioPresionArterial);
-      await sleep(1000);
+      await sleep(5000);
     }
   })();
   return (null);

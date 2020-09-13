@@ -6,18 +6,10 @@ import PropTypes from 'prop-types';
 import * as webBluetooth from './webBluetooth';
 
 const TemperaturaBluetooth = (props) => {
-  const temperaturaMediciones = [];
-
-  const guardarTemperaturaYEnviar = async (temperatura) => {
-    temperaturaMediciones.push(temperatura);
-    if (temperaturaMediciones.length === 5) {
-      const resEnviar = await axios.post('/medicionConstanteVital/temperatura', { valores: temperaturaMediciones });
-      const temperaturaMedicionesRefrescar = temperaturaMediciones.slice();
-      props.refrescarTemperaturaMediciones(temperaturaMedicionesRefrescar);
-      temperaturaMediciones.splice(0, temperaturaMediciones.length);
-      return resEnviar;
-    }
-    return temperaturaMediciones;
+  const enviarTemperatura = async (temperatura) => {
+    const resEnviar = await axios.post('/medicionConstanteVital/temperatura', { valores: [temperatura] });
+    props.refrescarTemperaturaMediciones([temperatura]);
+    return resEnviar;
   };
 
   const handleCaracteristicaTemperatura = async (caracteristica) => {
@@ -39,7 +31,7 @@ const TemperaturaBluetooth = (props) => {
         fecha,
       };
       console.log('Temperatura', temperaturaFecha);
-      guardarTemperaturaYEnviar(temperaturaFecha).then(null);
+      enviarTemperatura(temperaturaFecha).then(null);
       return temperaturaFecha;
     } catch (error) {
       console.log(error);
@@ -61,7 +53,7 @@ const TemperaturaBluetooth = (props) => {
     const servicioTemperatura = await webBluetooth.conectarBluetoothGetServicio('health_thermometer');
     while (true) {
       await getTemperatura(servicioTemperatura);
-      await sleep(1000);
+      await sleep(5000);
     }
   })();
   return (null);

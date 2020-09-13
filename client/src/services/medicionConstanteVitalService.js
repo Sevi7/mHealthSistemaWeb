@@ -17,4 +17,8 @@ export default {
     const res = await axios.get(`/medicionConstanteVital/presionArterial?fecha=${fecha}`);
     return res.data;
   },
+  getGlucemia: async (fecha) => {
+    const res = await axios.get(`/medicionConstanteVital/glucemia?fecha=${fecha}`);
+    return res.data;
+  },
 };

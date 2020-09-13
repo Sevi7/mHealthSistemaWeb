@@ -8,6 +8,7 @@ const MedicionConstanteVital = mongoose.model('MedicionConstanteVital');
 const Temperatura = mongoose.model('Temperatura');
 const FrecuenciaCardiaca = mongoose.model('FrecuenciaCardiaca');
 const PresionArterial = mongoose.model('PresionArterial');
+const Glucemia = mongoose.model('Glucemia');
 const routerMCV = express.Router();
 const middleware = require('./middleware.js');
 
@@ -151,6 +152,38 @@ routerMCV.get('/presionArterial', async (req, res) => {
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor, diastolica: medicion.diastolica, fecha: formatearFecha(medicion.fecha),
+  }));
+  return res.status(200).send(mediciones);
+});
+
+routerMCV.post('/glucemia', async (req, res) => {
+  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  const resultados = [];
+  for (const glucemia of valores) {
+    resultados.push(await Glucemia.create({
+      usuario: req.usuarioId,
+      valor: glucemia.valor,
+      fecha: glucemia.fecha,
+      postprandial: false,
+    }));
+  }
+
+  await Promise.all(resultados);
+  return res.status(201).send({
+    error: false,
+    valores,
+  });
+});
+
+routerMCV.get('/glucemia', async (req, res) => {
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
+  let mediciones = await Glucemia.find({
+    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+  });
+  mediciones = mediciones.map((medicion) => ({
+    valor: medicion.valor,
+    fecha: formatearFecha(medicion.fecha),
+    postprandial: medicion.postprandial,
   }));
   return res.status(200).send(mediciones);
 });

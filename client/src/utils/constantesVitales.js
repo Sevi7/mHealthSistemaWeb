@@ -24,7 +24,7 @@ export default {
     frecuenciaCardiaca: [0, 175],
     temperatura: [0, 40],
     presionArterial: [0, 175],
-    glucemia: [],
+    glucemia: [0, 400],
     default: [null, null],
   },
   dataFormat: {
@@ -37,6 +37,9 @@ export default {
     presionArterial: [
       { name: 'Sistólica', value: 'valor' },
       { name: 'Diastólica', value: 'diastolica' },
+    ],
+    glucemia: [
+      { name: 'Glucemia', value: 'valor' },
     ],
     default: [],
   },

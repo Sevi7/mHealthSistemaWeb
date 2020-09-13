@@ -40,6 +40,7 @@ import GraficoSpline from './componentes/GraficoSpline.jsx';
 import FrecuenciaCardiacaBluetooth from './componentes/webBluetooth/FrecuenciaCardiacaBluetooth.jsx';
 import TemperaturaBluetooth from './componentes/webBluetooth/TemperaturaBluetooth.jsx';
 import PresionArterialBluetooth from './componentes/webBluetooth/PresionArterialBluetooth.jsx';
+import GlucemiaBluetooth from './componentes/webBluetooth/GlucemiaBluetooth.jsx';
 import constantesVitales from './utils/constantesVitales';
 import medicionConstanteVitalService from './services/medicionConstanteVitalService';
 
@@ -134,10 +135,10 @@ const Dashboard = (props) => {
   const [fechaMediciones, setFechaMediciones] = useState(fechaHoy);
   const [titulo, setTitulo] = useState(null);
   const [usuarioHizoClick, setUsuarioHizoClick] = useState(false);
-  const [open, setOpen] = React.useState(true);
   const [tituloGrafico, setTituloGrafico] = useState(null);
   const [rangoVisual, setRangoVisual] = useState([null, null]);
   const [dataFormat, setDataFormat] = useState([]);
+  const [open, setOpen] = useState(true);
 
   const classes = useStyles();
 
@@ -200,6 +201,18 @@ const Dashboard = (props) => {
     ]);
   };
 
+  const refrescarGlucemiaMediciones = (nuevasMediciones) => {
+    const nuevasMedicionesFormateadas = nuevasMediciones.map((medicion) => ({
+      valor: medicion.valor,
+      fecha: formatearFecha(medicion.fecha),
+      postprandial: medicion.postprandial,
+    }));
+    setMediciones((mediciones) => [
+      ...mediciones,
+      ...nuevasMedicionesFormateadas,
+    ]);
+  };
+
   const handleInicio = () => {
     setConstanteVital(constantesVitales.nombre.default);
   };
@@ -216,6 +229,10 @@ const Dashboard = (props) => {
     setConstanteVital(constantesVitales.nombre.presionArterial);
   };
 
+  const handleGlucemia = () => {
+    setConstanteVital(constantesVitales.nombre.glucemia);
+  };
+
   useEffect(() => {
     let medicionesAPI = [];
     (async () => {
@@ -225,6 +242,8 @@ const Dashboard = (props) => {
         medicionesAPI = await medicionConstanteVitalService.getTemperatura(fechaMediciones);
       } else if (constanteVital === constantesVitales.nombre.presionArterial) {
         medicionesAPI = await medicionConstanteVitalService.getPresionArterial(fechaMediciones);
+      } else if (constanteVital === constantesVitales.nombre.glucemia) {
+        medicionesAPI = await medicionConstanteVitalService.getGlucemia(fechaMediciones);
       }
       setMediciones(medicionesAPI);
     })();
@@ -264,6 +283,14 @@ const Dashboard = (props) => {
         />
       );
     }
+    if (constanteVital === constantesVitales.nombre.glucemia) {
+      return (
+        <GlucemiaBluetooth
+          refrescarGlucemiaMediciones={refrescarGlucemiaMediciones}
+          resetearBotonConectar={resetearBotonConectar}
+        />
+      );
+    }
 
     return null;
   };
@@ -294,7 +321,7 @@ const Dashboard = (props) => {
         </ListItemIcon>
         <ListItemText primary="Presion Arterial" />
       </ListItem>
-      <ListItem button>
+      <ListItem button onClick={handleGlucemia}>
         <ListItemIcon>
           <Icon icon={spoonSugar} width="1.8em" height="1.8em" />
         </ListItemIcon>
