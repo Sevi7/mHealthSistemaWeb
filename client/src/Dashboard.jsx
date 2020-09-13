@@ -45,6 +45,7 @@ import PresionArterialBluetooth from './componentes/webBluetooth/PresionArterial
 import GlucemiaBluetooth from './componentes/webBluetooth/GlucemiaBluetooth.jsx';
 import constantesVitales from './utils/constantesVitales';
 import medicionConstanteVitalService from './services/medicionConstanteVitalService';
+import Common from './utils/Common';
 
 const drawerWidth = 240;
 
@@ -154,6 +155,11 @@ const Dashboard = (props) => {
   };
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleCerrarSesion = () => {
+    Common.eliminarSesionUsuario();
+    window.location.replace('/');
   };
 
   const conectarBluetooth = () => {
@@ -341,7 +347,7 @@ const Dashboard = (props) => {
 
   const secondaryListItems = (
     <div>
-      <ListItem button>
+      <ListItem button onClick={handleCerrarSesion}>
         <ListItemIcon>
           <ExitToAppIcon />
         </ListItemIcon>
