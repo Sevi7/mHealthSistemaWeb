@@ -13,4 +13,8 @@ export default {
     const res = await axios.get(`/medicionConstanteVital/temperatura?fecha=${fecha}`);
     return res.data;
   },
+  getPresionArterial: async (fecha) => {
+    const res = await axios.get(`/medicionConstanteVital/presionArterial?fecha=${fecha}`);
+    return res.data;
+  },
 };

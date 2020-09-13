@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 
 const MedicionConstanteVital = mongoose.model('MedicionConstanteVital');
 const Temperatura = mongoose.model('Temperatura');
-const Peso = mongoose.model('Peso');
 const FrecuenciaCardiaca = mongoose.model('FrecuenciaCardiaca');
+const PresionArterial = mongoose.model('PresionArterial');
 const routerMCV = express.Router();
 const middleware = require('./middleware.js');
 
@@ -43,14 +43,6 @@ routerMCV.delete('/:id', async (req, res) => {
   return res.status(202).send({
     error: false,
     medicion,
-  });
-});
-
-routerMCV.post('/peso', async (req, res) => {
-  const peso = await Peso.create({ usuario: req.usuarioId, valor: req.body.valor });
-  return res.status(201).send({
-    error: false,
-    peso,
   });
 });
 
@@ -129,6 +121,36 @@ routerMCV.get('/temperatura', async (req, res) => {
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor, fecha: formatearFecha(medicion.fecha),
+  }));
+  return res.status(200).send(mediciones);
+});
+
+routerMCV.post('/presionArterial', async (req, res) => {
+  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  const resultados = [];
+  for (const presionArterial of valores) {
+    resultados.push(await PresionArterial.create({
+      usuario: req.usuarioId,
+      valor: presionArterial.valor,
+      diastolica: presionArterial.diastolica,
+      fecha: presionArterial.fecha,
+    }));
+  }
+
+  await Promise.all(resultados);
+  return res.status(201).send({
+    error: false,
+    valores,
+  });
+});
+
+routerMCV.get('/presionArterial', async (req, res) => {
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
+  let mediciones = await PresionArterial.find({
+    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+  });
+  mediciones = mediciones.map((medicion) => ({
+    valor: medicion.valor, diastolica: medicion.diastolica, fecha: formatearFecha(medicion.fecha),
   }));
   return res.status(200).send(mediciones);
 });

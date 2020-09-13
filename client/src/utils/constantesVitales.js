@@ -2,37 +2,42 @@ export default {
   nombre: {
     frecuenciaCardiaca: 'frecuenciaCardiaca',
     temperatura: 'temperatura',
-    peso: 'peso',
     presionArterial: 'presionArterial',
     glucemia: 'glucemia',
-    saturacionOxigeno: 'saturacionOxigeno',
     default: 'default',
   },
   titulo: {
     frecuenciaCardiaca: 'Frecuencia Cardiaca',
     temperatura: 'Temperatura',
-    peso: 'Peso',
     presionArterial: 'Presión Arterial',
     glucemia: 'Glucemia',
-    saturacionOxigeno: 'Saturación Oxígeno',
     default: 'mHealth',
   },
   tituloGrafico: {
     frecuenciaCardiaca: 'Frecuencia Cardiaca (PPM)',
     temperatura: 'Temperatura (°C)',
-    peso: 'Peso (Kg)',
     presionArterial: 'Presión Arterial (mmHg)',
     glucemia: 'Glucemia (mg/dL)',
-    saturacionOxigeno: 'Saturación Oxígeno (SpO2)',
     default: '',
   },
   rangoVisual: {
     frecuenciaCardiaca: [0, 175],
     temperatura: [0, 40],
-    peso: [],
-    presionArterial: [],
+    presionArterial: [0, 175],
     glucemia: [],
-    saturacionOxigeno: [],
     default: [null, null],
+  },
+  dataFormat: {
+    frecuenciaCardiaca: [
+      { name: 'Frecuencia Cardiaca', value: 'valor' },
+    ],
+    temperatura: [
+      { name: 'Temperatura', value: 'valor' },
+    ],
+    presionArterial: [
+      { name: 'Sistólica', value: 'valor' },
+      { name: 'Diastólica', value: 'diastolica' },
+    ],
+    default: [],
   },
 };

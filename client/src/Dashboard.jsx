@@ -9,7 +9,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Box from '@material-ui/core/Box';
 import { Icon } from '@iconify/react';
 import thermometerIcon from '@iconify/icons-mdi/thermometer';
-import scaleBathroomIcon from '@iconify/icons-mdi/scale-bathroom';
+import bloodBag from '@iconify/icons-mdi/blood-bag';
+import spoonSugar from '@iconify/icons-mdi/spoon-sugar';
 import HomeIcon from '@material-ui/icons/Home';
 import HeartRateIcon from '@material-ui/icons/Favorite';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
@@ -38,6 +39,7 @@ import PropTypes from 'prop-types';
 import GraficoSpline from './componentes/GraficoSpline.jsx';
 import FrecuenciaCardiacaBluetooth from './componentes/webBluetooth/FrecuenciaCardiacaBluetooth.jsx';
 import TemperaturaBluetooth from './componentes/webBluetooth/TemperaturaBluetooth.jsx';
+import PresionArterialBluetooth from './componentes/webBluetooth/PresionArterialBluetooth.jsx';
 import constantesVitales from './utils/constantesVitales';
 import medicionConstanteVitalService from './services/medicionConstanteVitalService';
 
@@ -135,6 +137,7 @@ const Dashboard = (props) => {
   const [open, setOpen] = React.useState(true);
   const [tituloGrafico, setTituloGrafico] = useState(null);
   const [rangoVisual, setRangoVisual] = useState([null, null]);
+  const [dataFormat, setDataFormat] = useState([]);
 
   const classes = useStyles();
 
@@ -185,6 +188,18 @@ const Dashboard = (props) => {
     ]);
   };
 
+  const refrescarPresionArterialMediciones = (nuevasMediciones) => {
+    const nuevasMedicionesFormateadas = nuevasMediciones.map((medicion) => ({
+      valor: medicion.valor,
+      diastolica: medicion.diastolica,
+      fecha: formatearFecha(medicion.fecha),
+    }));
+    setMediciones((mediciones) => [
+      ...mediciones,
+      ...nuevasMedicionesFormateadas,
+    ]);
+  };
+
   const handleInicio = () => {
     setConstanteVital(constantesVitales.nombre.default);
   };
@@ -197,6 +212,10 @@ const Dashboard = (props) => {
     setConstanteVital(constantesVitales.nombre.temperatura);
   };
 
+  const handlePresionArterial = () => {
+    setConstanteVital(constantesVitales.nombre.presionArterial);
+  };
+
   useEffect(() => {
     let medicionesAPI = [];
     (async () => {
@@ -204,6 +223,8 @@ const Dashboard = (props) => {
         medicionesAPI = await medicionConstanteVitalService.getFrecuenciaCardiaca(fechaMediciones);
       } else if (constanteVital === constantesVitales.nombre.temperatura) {
         medicionesAPI = await medicionConstanteVitalService.getTemperatura(fechaMediciones);
+      } else if (constanteVital === constantesVitales.nombre.presionArterial) {
+        medicionesAPI = await medicionConstanteVitalService.getPresionArterial(fechaMediciones);
       }
       setMediciones(medicionesAPI);
     })();
@@ -213,6 +234,7 @@ const Dashboard = (props) => {
     setTitulo(constantesVitales.titulo[constanteVital]);
     setTituloGrafico(constantesVitales.tituloGrafico[constanteVital]);
     setRangoVisual(constantesVitales.rangoVisual[constanteVital]);
+    setDataFormat(constantesVitales.dataFormat[constanteVital]);
   }, [constanteVital]);
 
   useEffect(() => { }, [usuarioHizoClick]);
@@ -234,6 +256,15 @@ const Dashboard = (props) => {
         />
       );
     }
+    if (constanteVital === constantesVitales.nombre.presionArterial) {
+      return (
+        <PresionArterialBluetooth
+          refrescarPresionArterialMediciones={refrescarPresionArterialMediciones}
+          resetearBotonConectar={resetearBotonConectar}
+        />
+      );
+    }
+
     return null;
   };
 
@@ -257,11 +288,17 @@ const Dashboard = (props) => {
         </ListItemIcon>
         <ListItemText primary="Temperatura" />
       </ListItem>
+      <ListItem button onClick={handlePresionArterial}>
+        <ListItemIcon>
+          <Icon icon={bloodBag} width="1.8em" height="1.8em" />
+        </ListItemIcon>
+        <ListItemText primary="Presion Arterial" />
+      </ListItem>
       <ListItem button>
         <ListItemIcon>
-          <Icon icon={scaleBathroomIcon} width="1.8em" height="1.8em" />
+          <Icon icon={spoonSugar} width="1.8em" height="1.8em" />
         </ListItemIcon>
-        <ListItemText primary="Peso" />
+        <ListItemText primary="Glucemia" />
       </ListItem>
     </div>
   );
@@ -375,6 +412,7 @@ const Dashboard = (props) => {
                   <Paper className={classes.paper}>
                     <GraficoSpline
                       data={mediciones}
+                      dataFormat={dataFormat}
                       titulo={tituloGrafico}
                       rangoVisual={rangoVisual}
                     />

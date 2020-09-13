@@ -15,7 +15,9 @@ import {
 import PropTypes from 'prop-types';
 
 const GraficoSpline = (props) => {
-  const { data, titulo, rangoVisual } = props;
+  const {
+    data, dataFormat, titulo, rangoVisual,
+  } = props;
   return (
     <>
       <Chart
@@ -25,14 +27,22 @@ const GraficoSpline = (props) => {
       >
         <CommonSeriesSettings
           argumentField="fecha"
-          valueField="valor"
           type="spline"
         />
         <CommonAxisSettings>
           <Grid visible />
         </CommonAxisSettings>
 
-        <Series showInLegend={false} />
+        {
+          dataFormat.map((serie) => (
+            <Series
+              valueField={serie.value}
+              key={serie.name}
+              name={serie.name}
+              showInLegend={dataFormat.length > 1}
+            />
+          ))
+        }
 
         <Margin bottom={20} />
         <ValueAxis
@@ -58,6 +68,12 @@ GraficoSpline.propTypes = {
     PropTypes.shape({
       valor: PropTypes.number,
       fecha: PropTypes.string,
+    }),
+  ).isRequired,
+  dataFormat: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      value: PropTypes.string,
     }),
   ).isRequired,
   titulo: PropTypes.string.isRequired,
