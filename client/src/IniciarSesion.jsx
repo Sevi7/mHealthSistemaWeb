@@ -81,7 +81,9 @@ export default function App() {
     } else {
       try {
         const res = await axios.post('/iniciarSesion', { email, contraseña });
-        Common.setSesionUsuario(res.data.usuarioId, res.data.token, res.data.expiraEn);
+        Common.setSesionUsuario(
+          res.data.usuarioId, res.data.token, res.data.expiraEn, res.data.usuarioDatos,
+        );
         window.location.replace('/dashboard');
       } catch (err) {
         if (err.response.status === 400) {

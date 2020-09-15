@@ -25,6 +25,7 @@ Volver a la carpeta raíz:
 ```
 cd ..
 ```
+
 Ejecutar:
 ```
 npm run dev
@@ -59,4 +60,3 @@ Puede crear dispositivos virtuales BLE de medición de constantes vitales con la
   - Característica: 0x2A18 (Glucose Measurement)
   - Properties: Read
   - Valor (Ejemplo): 40-00-00-00-00-00-00-00-00-00-B0-53-00-00 equivale a 83 mg/dL
-

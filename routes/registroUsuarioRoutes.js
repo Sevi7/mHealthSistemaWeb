@@ -108,11 +108,19 @@ module.exports = (app) => {
       };
       const token = jwt.encode(payload, config.TOKEN_KEY);
 
+      const usuarioDatos = {
+        fechaNacimiento: usuarioDB.fechaNacimiento,
+        altura: usuarioDB.altura,
+        sexo: usuarioDB.sexo,
+        diabetes: usuarioDB.diabetes,
+      };
+
       return res.json({
         ok: true,
         usuarioId: usuarioDB.id,
         token,
         expiraEn: 7200,
+        usuarioDatos,
       });
     });
   });

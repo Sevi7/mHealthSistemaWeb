@@ -7,6 +7,15 @@ const middleware = require('./middleware.js');
 
 routerUsuario.use(middleware.comprobarToken);
 
+routerUsuario.get('/', async (req, res) => {
+  const usuario = await Usuario.findById(req.usuarioId);
+
+  return res.status(202).send({
+    ok: true,
+    usuario,
+  });
+});
+
 routerUsuario.put('/', async (req, res) => {
   const usuario = await Usuario.findByIdAndUpdate(req.usuarioId, req.body);
 

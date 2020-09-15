@@ -103,7 +103,9 @@ export default function RegistroUsuario() {
         const res = await axios.post('/registroUsuario', {
           nombre, apellidos, email, contraseña, fechaNacimiento: fechaNacimientoString, altura, sexo, diabetes,
         });
-        Common.setSesionUsuario(res.data.usuarioId, res.data.token, res.data.expiraEn);
+        Common.setSesionUsuario(
+          res.data.usuarioId, res.data.token, res.data.expiraEn, res.data.usuarioDatos,
+        );
         window.location.replace('/dashboard');
       } catch (err) {
         console.log(err);

@@ -16,12 +16,12 @@ export default function App() {
       <div className="App">
         <Switch>
           <Route exact path="/">
-            {Common.sesionIniciada() ? <Dashboard fechaHoy={Common.getFechaHoy()} /> : <IniciarSesion />}
+            {Common.sesionIniciada() ? <Dashboard fechaHoy={Common.getFechaHoy()} usuarioDatos={Common.getUsuarioDatos()} /> : <IniciarSesion />}
           </Route>
           <Route path="/registroUsuario" component={RegistroUsuario} />
           <Route path="/iniciarSesion" component={IniciarSesion} />
           <Route exact path="/dashboard">
-            {Common.sesionIniciada() ? <Dashboard fechaHoy={Common.getFechaHoy()} /> : <Redirect to="/" />}
+            {Common.sesionIniciada() ? <Dashboard fechaHoy={Common.getFechaHoy()} usuarioDatos={Common.getUsuarioDatos()} /> : <Redirect to="/" />}
           </Route>
         </Switch>
       </div>

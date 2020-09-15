@@ -125,6 +125,41 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
+
+const formatearFecha = (fecha) => {
+  const fechaObjeto = new Date(fecha);
+  return añadirCeroCuandoMenorADiez(fechaObjeto.getHours())
+    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getMinutes())
+    + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getSeconds());
+};
+
+const calcularEdad = (fechaNacimiento) => {
+  const fechaNacimientoPartes = fechaNacimiento.split('T')[0].split('-');
+  const fechaNacimientoObj = new Date(
+    fechaNacimientoPartes[0], fechaNacimientoPartes[2] - 1, fechaNacimientoPartes[1],
+  );
+  const edadDifMs = Date.now() - fechaNacimientoObj.getTime();
+  const edadFecha = new Date(edadDifMs);
+  return Math.abs(edadFecha.getUTCFullYear() - 1970);
+};
+
+const getValoresCriticosFrecuenciaCardiacaEnEjercicio = (edad, sexo) => (
+  sexo === 'masculino'
+    ? {
+      minimoCritico: 60,
+      minimo: (220 - edad) * 0.5,
+      maximo: (220 - edad) * 0.85,
+      maximoCritico: 220 - edad,
+    }
+    : {
+      minimoCritico: 60,
+      minimo: (226 - edad) * 0.5,
+      maximo: (226 - edad) * 0.85,
+      maximoCritico: 226 - edad,
+    }
+);
+
 class LocalizedUtils extends MomentUtils {
   getDatePickerHeaderText(date) {
     return moment(date).format('DD/MM/YYYY');
@@ -132,7 +167,7 @@ class LocalizedUtils extends MomentUtils {
 }
 
 const Dashboard = (props) => {
-  const { fechaHoy } = props;
+  const { fechaHoy, usuarioDatos } = props;
   const [constanteVital, setConstanteVital] = useState(constantesVitales.nombre.default);
   const [mediciones, setMediciones] = useState([]);
   const [fechaMediciones, setFechaMediciones] = useState(fechaHoy);
@@ -143,6 +178,8 @@ const Dashboard = (props) => {
   const [dataFormat, setDataFormat] = useState([]);
   const [checkbox, setCheckbox] = useState(false);
   const [open, setOpen] = useState(true);
+
+  const edad = calcularEdad(usuarioDatos.fechaNacimiento);
 
   const classes = useStyles();
 
@@ -168,15 +205,6 @@ const Dashboard = (props) => {
 
   const resetearBotonConectar = () => {
     setUsuarioHizoClick(false);
-  };
-
-  const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
-
-  const formatearFecha = (fecha) => {
-    const fechaObjeto = new Date(fecha);
-    return añadirCeroCuandoMenorADiez(fechaObjeto.getHours())
-      + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getMinutes())
-      + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getSeconds());
   };
 
   const refrescarFrecuenciaCardiacaMediciones = (nuevasMediciones) => {
@@ -244,6 +272,34 @@ const Dashboard = (props) => {
 
   const handleGlucemia = () => {
     setConstanteVital(constantesVitales.nombre.glucemia);
+  };
+
+  const personalizarValoresCriticos = () => {
+    if (constanteVital === constantesVitales.nombre.temperatura
+      || constanteVital === constantesVitales.nombre.presionArterial) {
+      return constantesVitales.valoresCriticos[constanteVital];
+    }
+
+    if (constanteVital === constantesVitales.nombre.frecuenciaCardiaca) {
+      return {
+        filterTrue: constantesVitales.valoresCriticos[constanteVital].enReposo,
+        filterFalse: getValoresCriticosFrecuenciaCardiacaEnEjercicio(edad, usuarioDatos.sexo),
+      };
+    }
+
+    if (constanteVital === constantesVitales.nombre.glucemia) {
+      return usuarioDatos.diabetes
+        ? {
+          filterTrue: constantesVitales.valoresCriticos[constanteVital].diabetes.postprandial,
+          filterFalse: constantesVitales.valoresCriticos[constanteVital].diabetes.ayuno,
+        }
+        : {
+          filterTrue: constantesVitales.valoresCriticos[constanteVital].noDiabetes.postprandial,
+          filterFalse: constantesVitales.valoresCriticos[constanteVital].noDiabetes.ayuno,
+        };
+    }
+
+    return {};
   };
 
   useEffect(() => {
@@ -472,6 +528,7 @@ const Dashboard = (props) => {
                       dataFormat={dataFormat}
                       titulo={tituloGrafico}
                       rangoVisual={rangoVisual}
+                      valoresCriticos={personalizarValoresCriticos()}
                     />
                   </Paper>
                 </Grid>
@@ -485,6 +542,12 @@ const Dashboard = (props) => {
 
 Dashboard.propTypes = {
   fechaHoy: PropTypes.string.isRequired,
+  usuarioDatos: PropTypes.shape({
+    fechaNacimiento: PropTypes.string,
+    altura: PropTypes.number,
+    sexo: PropTypes.string,
+    diabetes: PropTypes.bool,
+  }).isRequired,
 };
 
 export default Dashboard;
