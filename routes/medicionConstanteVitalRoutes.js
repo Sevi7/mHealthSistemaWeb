@@ -1,8 +1,10 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable prefer-template */
 const express = require('express');
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const MedicionConstanteVital = mongoose.model('MedicionConstanteVital');
 const Temperatura = mongoose.model('Temperatura');
@@ -13,39 +15,6 @@ const routerMCV = express.Router();
 const middleware = require('./middleware.js');
 
 routerMCV.use(middleware.comprobarToken);
-
-routerMCV.get('/', async (req, res) => {
-  const mediciones = await MedicionConstanteVital.find({ usuario: req.usuarioId });
-  return res.status(200).send(mediciones);
-});
-
-routerMCV.post('/', async (req, res) => {
-  const medicion = await MedicionConstanteVital.create({
-    usuario: req.usuarioId, valor: req.body.valor,
-  });
-  return res.status(201).send({
-    error: false,
-    medicion,
-  });
-});
-
-routerMCV.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const medicion = await MedicionConstanteVital.findByIdAndUpdate(id, req.body);
-  return res.status(202).send({
-    error: false,
-    medicion,
-  });
-});
-
-routerMCV.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  const medicion = await MedicionConstanteVital.findByIdAndDelete(id);
-  return res.status(202).send({
-    error: false,
-    medicion,
-  });
-});
 
 const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
 
@@ -67,6 +36,33 @@ const getFechaYSiguienteDiaEnSeg = (fechaString) => {
   return { minFecha, maxFecha };
 };
 
+const fechaEsValida = (fecha) => {
+  const fechaTest = moment(fecha, 'DD/MM/YYYY');
+  return fechaTest.isValid();
+};
+
+routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
+  const { fecha } = req.query;
+
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+  let mediciones = await FrecuenciaCardiaca.find({
+    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+  });
+  mediciones = mediciones.map((medicion) => ({
+    valor: medicion.valor, fecha: formatearFecha(medicion.fecha), enReposo: medicion.enReposo,
+  }));
+  return res.status(200).send(mediciones);
+});
+
 routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
   const resultados = [];
@@ -81,18 +77,29 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
 
   await Promise.all(resultados);
   return res.status(201).send({
-    error: false,
+    ok: true,
     valores,
   });
 });
 
-routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
-  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
-  let mediciones = await FrecuenciaCardiaca.find({
+routerMCV.get('/temperatura', async (req, res) => {
+  const { fecha } = req.query;
+
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+  let mediciones = await Temperatura.find({
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, fecha: formatearFecha(medicion.fecha), enReposo: medicion.enReposo,
+    valor: medicion.valor, fecha: formatearFecha(medicion.fecha),
   }));
   return res.status(200).send(mediciones);
 });
@@ -110,18 +117,27 @@ routerMCV.post('/temperatura', async (req, res) => {
 
   await Promise.all(resultados);
   return res.status(201).send({
-    error: false,
+    ok: true,
     valores,
   });
 });
 
-routerMCV.get('/temperatura', async (req, res) => {
-  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
-  let mediciones = await Temperatura.find({
+routerMCV.get('/presionArterial', async (req, res) => {
+  const { fecha } = req.query;
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+  let mediciones = await PresionArterial.find({
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, fecha: formatearFecha(medicion.fecha),
+    valor: medicion.valor, diastolica: medicion.diastolica, fecha: formatearFecha(medicion.fecha),
   }));
   return res.status(200).send(mediciones);
 });
@@ -140,18 +156,29 @@ routerMCV.post('/presionArterial', async (req, res) => {
 
   await Promise.all(resultados);
   return res.status(201).send({
-    error: false,
+    ok: true,
     valores,
   });
 });
 
-routerMCV.get('/presionArterial', async (req, res) => {
-  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
-  let mediciones = await PresionArterial.find({
+routerMCV.get('/glucemia', async (req, res) => {
+  const { fecha } = req.query;
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+  let mediciones = await Glucemia.find({
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, diastolica: medicion.diastolica, fecha: formatearFecha(medicion.fecha),
+    valor: medicion.valor,
+    fecha: formatearFecha(medicion.fecha),
+    postprandial: medicion.postprandial,
   }));
   return res.status(200).send(mediciones);
 });
@@ -170,22 +197,69 @@ routerMCV.post('/glucemia', async (req, res) => {
 
   await Promise.all(resultados);
   return res.status(201).send({
-    error: false,
+    ok: true,
     valores,
   });
 });
 
-routerMCV.get('/glucemia', async (req, res) => {
-  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(req.query.fecha);
-  let mediciones = await Glucemia.find({
-    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+const getConstanteVitalMongoDB = (constanteVital) => {
+  if (constanteVital === 'frecuenciaCardiaca') {
+    return FrecuenciaCardiaca;
+  }
+  if (constanteVital === 'temperatura') {
+    return Temperatura;
+  }
+  if (constanteVital === 'presionArterial') {
+    return PresionArterial;
+  }
+  if (constanteVital === 'glucemia') {
+    return Glucemia;
+  }
+  return null;
+};
+
+routerMCV.delete('/', async (req, res) => {
+  const { fecha, constanteVital } = req.query;
+
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+
+  const constanteVitalMongoDB = getConstanteVitalMongoDB(constanteVital);
+
+  if (!constanteVitalMongoDB) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La constante vital introducida es incorrecta.',
+      },
+    });
+  }
+
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+
+  await constanteVitalMongoDB.deleteMany({
+    usuario: req.usuarioId,
+    fecha: { $gt: minFecha, $lt: maxFecha },
   });
-  mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor,
-    fecha: formatearFecha(medicion.fecha),
-    postprandial: medicion.postprandial,
-  }));
-  return res.status(200).send(mediciones);
+
+  return res.status(200).send({
+    ok: true,
+  });
+});
+
+routerMCV.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  const medicion = await MedicionConstanteVital.findByIdAndDelete(id);
+  return res.status(202).send({
+    ok: true,
+    medicion,
+  });
 });
 
 module.exports = routerMCV;

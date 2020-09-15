@@ -21,4 +21,8 @@ export default {
     const res = await axios.get(`/medicionConstanteVital/glucemia?fecha=${fecha}`);
     return res.data;
   },
+  deleteMedicionConstanteVital: async (constanteVital, fecha) => {
+    const res = await axios.delete(`/medicionConstanteVital?constanteVital=${constanteVital}&fecha=${fecha}`);
+    return res.data;
+  },
 };

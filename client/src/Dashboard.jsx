@@ -18,6 +18,7 @@ import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
@@ -123,6 +124,9 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'auto',
     flexDirection: 'column',
   },
+  eliminarButton: {
+    color: 'red',
+  },
 }));
 
 const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
@@ -183,15 +187,35 @@ const Dashboard = (props) => {
 
   const classes = useStyles();
 
-  const handleCheckbox = (event) => {
-    setCheckbox(event.target.checked);
-  };
-
-  const handleDrawerOpen = () => {
+  const handleMenuAbrir = () => {
     setOpen(true);
   };
-  const handleDrawerClose = () => {
+  const handleMenuCerrar = () => {
     setOpen(false);
+  };
+
+  const handleInicio = () => {
+    setConstanteVital(constantesVitales.nombre.default);
+  };
+
+  const handleFrecuenciaCardiaca = () => {
+    setConstanteVital(constantesVitales.nombre.frecuenciaCardiaca);
+  };
+
+  const handleTemperatura = () => {
+    setConstanteVital(constantesVitales.nombre.temperatura);
+  };
+
+  const handlePresionArterial = () => {
+    setConstanteVital(constantesVitales.nombre.presionArterial);
+  };
+
+  const handleGlucemia = () => {
+    setConstanteVital(constantesVitales.nombre.glucemia);
+  };
+
+  const handleCheckbox = (event) => {
+    setCheckbox(event.target.checked);
   };
 
   const handleCerrarSesion = () => {
@@ -199,7 +223,16 @@ const Dashboard = (props) => {
     window.location.replace('/');
   };
 
-  const conectarBluetooth = () => {
+  const handleEliminar = () => {
+    (async () => {
+      await medicionConstanteVitalService.deleteMedicionConstanteVital(
+        constanteVital, fechaMediciones,
+      );
+      setMediciones([]);
+    })();
+  };
+
+  const handleConectar = () => {
     setUsuarioHizoClick(true);
   };
 
@@ -254,26 +287,6 @@ const Dashboard = (props) => {
     ]);
   };
 
-  const handleInicio = () => {
-    setConstanteVital(constantesVitales.nombre.default);
-  };
-
-  const handleFrecuenciaCardiaca = () => {
-    setConstanteVital(constantesVitales.nombre.frecuenciaCardiaca);
-  };
-
-  const handleTemperatura = () => {
-    setConstanteVital(constantesVitales.nombre.temperatura);
-  };
-
-  const handlePresionArterial = () => {
-    setConstanteVital(constantesVitales.nombre.presionArterial);
-  };
-
-  const handleGlucemia = () => {
-    setConstanteVital(constantesVitales.nombre.glucemia);
-  };
-
   const personalizarValoresCriticos = () => {
     if (constanteVital === constantesVitales.nombre.temperatura
       || constanteVital === constantesVitales.nombre.presionArterial) {
@@ -325,7 +338,8 @@ const Dashboard = (props) => {
     setDataFormat(constantesVitales.dataFormat[constanteVital]);
   }, [constanteVital]);
 
-  useEffect(() => { }, [usuarioHizoClick]);
+  useEffect(() => {
+  }, [usuarioHizoClick]);
 
   const getComponenteBluetooth = () => {
     if (constanteVital === constantesVitales.nombre.frecuenciaCardiaca) {
@@ -421,7 +435,7 @@ const Dashboard = (props) => {
             edge="start"
             color="inherit"
             aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            onClick={handleMenuAbrir}
             className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
@@ -444,7 +458,7 @@ const Dashboard = (props) => {
         open={open}
       >
         <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={handleMenuCerrar}>
             <ChevronLeftIcon />
           </IconButton>
         </div>
@@ -490,36 +504,53 @@ const Dashboard = (props) => {
                     </MuiPickersUtilsProvider>
                   </Paper>
                 </Grid>
-                <Grid item xs={3}>
-                  {fechaMediciones === fechaHoy
-                    && (
+                <Grid item xs={9}>
+                  <Grid container spacing={2} direction="column">
+                    <Grid item xs={3}>
                       <Button
                         fullWidth
-                        variant="contained"
-                        color="primary"
-                        startIcon={<BluetoothIcon />}
-                        onClick={conectarBluetooth}
+                        variant="outlined"
+                        color="inherit"
+                        startIcon={<DeleteIcon />}
+                        className={classes.eliminarButton}
+                        onClick={handleEliminar}
                       >
-                        Conectar
+                        Eliminar
                       </Button>
-                    )}
-                  {fechaMediciones === fechaHoy && constantesVitales.checkbox[constanteVital]
-                    && (
-                      <FormControlLabel
-                        control={(
-                          <Checkbox
-                            checked={checkbox}
-                            onChange={handleCheckbox}
-                            name="checkedB"
-                            color="secondary"
+                    </Grid>
+                    <Grid item xs={3}>
+                      {fechaMediciones === fechaHoy
+                        && (
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            startIcon={<BluetoothIcon />}
+                            onClick={handleConectar}
+                          >
+                            Conectar
+                          </Button>
+                        )}
+                    </Grid>
+                    {usuarioHizoClick
+                      && getComponenteBluetooth()}
+                    <Grid item xs={3}>
+                      {fechaMediciones === fechaHoy && constantesVitales.checkbox[constanteVital]
+                        && (
+                          <FormControlLabel
+                            control={(
+                              <Checkbox
+                                checked={checkbox}
+                                onChange={handleCheckbox}
+                                name="checkedB"
+                                color="secondary"
+                              />
+                            )}
+                            label={constantesVitales.checkbox[constanteVital]}
                           />
                         )}
-                        label={constantesVitales.checkbox[constanteVital]}
-                      />
-
-                    )}
-                  {usuarioHizoClick
-                    && getComponenteBluetooth()}
+                    </Grid>
+                  </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <Paper className={classes.paper}>
