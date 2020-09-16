@@ -7,6 +7,7 @@ const options = { discriminatorKey: 'tipoConstanteVital' };
 const medicionConstanteVitalSchema = new Schema({
   valor: { type: Number, required: true },
   fecha: { type: Number, required: true },
+  alerta: { type: Number },
   usuario: { type: String, required: true },
 },
 options);

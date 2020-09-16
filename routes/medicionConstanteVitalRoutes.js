@@ -13,6 +13,7 @@ const PresionArterial = mongoose.model('PresionArterial');
 const Glucemia = mongoose.model('Glucemia');
 const routerMCV = express.Router();
 const middleware = require('./middleware.js');
+const { getValoresCriticosMedicion, getNivelAlerta } = require('../utils/alertas');
 
 routerMCV.use(middleware.comprobarToken);
 
@@ -66,13 +67,18 @@ routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
 routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
   const resultados = [];
-  for (const frecuenciaCardiaca of valores) {
-    resultados.push(await FrecuenciaCardiaca.create({
-      usuario: req.usuarioId,
-      valor: frecuenciaCardiaca.valor,
-      fecha: frecuenciaCardiaca.fecha,
-      enReposo: frecuenciaCardiaca.enReposo,
-    }));
+
+  if (valores) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'frecuenciaCardiaca', req.usuarioId);
+    for (const frecuenciaCardiaca of valores) {
+      resultados.push(await FrecuenciaCardiaca.create({
+        usuario: req.usuarioId,
+        valor: frecuenciaCardiaca.valor,
+        fecha: frecuenciaCardiaca.fecha,
+        enReposo: frecuenciaCardiaca.enReposo || false,
+        alerta: getNivelAlerta(frecuenciaCardiaca.valor, valoresCriticosMedicion),
+      }));
+    }
   }
 
   await Promise.all(resultados);
@@ -107,12 +113,16 @@ routerMCV.get('/temperatura', async (req, res) => {
 routerMCV.post('/temperatura', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
   const resultados = [];
-  for (const temperatura of valores) {
-    resultados.push(await Temperatura.create({
-      usuario: req.usuarioId,
-      valor: temperatura.valor,
-      fecha: temperatura.fecha,
-    }));
+  if (valores) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'temperatura', req.usuarioId);
+    for (const temperatura of valores) {
+      resultados.push(await Temperatura.create({
+        usuario: req.usuarioId,
+        valor: temperatura.valor,
+        fecha: temperatura.fecha,
+        alerta: getNivelAlerta(temperatura.valor, valoresCriticosMedicion),
+      }));
+    }
   }
 
   await Promise.all(resultados);
@@ -145,13 +155,20 @@ routerMCV.get('/presionArterial', async (req, res) => {
 routerMCV.post('/presionArterial', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
   const resultados = [];
-  for (const presionArterial of valores) {
-    resultados.push(await PresionArterial.create({
-      usuario: req.usuarioId,
-      valor: presionArterial.valor,
-      diastolica: presionArterial.diastolica,
-      fecha: presionArterial.fecha,
-    }));
+  if (valores) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'presionArterial', req.usuarioId);
+    for (const presionArterial of valores) {
+      resultados.push(await PresionArterial.create({
+        usuario: req.usuarioId,
+        valor: presionArterial.valor,
+        diastolica: presionArterial.diastolica,
+        fecha: presionArterial.fecha,
+        alerta: Math.max(
+          getNivelAlerta(presionArterial.valor, valoresCriticosMedicion.sistolica),
+          getNivelAlerta(presionArterial.diastolica, valoresCriticosMedicion.diastolica),
+        ),
+      }));
+    }
   }
 
   await Promise.all(resultados);
@@ -186,13 +203,17 @@ routerMCV.get('/glucemia', async (req, res) => {
 routerMCV.post('/glucemia', async (req, res) => {
   const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
   const resultados = [];
-  for (const glucemia of valores) {
-    resultados.push(await Glucemia.create({
-      usuario: req.usuarioId,
-      valor: glucemia.valor,
-      fecha: glucemia.fecha,
-      postprandial: glucemia.postprandial,
-    }));
+  if (valores) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'glucemia', req.usuarioId);
+    for (const glucemia of valores) {
+      resultados.push(await Glucemia.create({
+        usuario: req.usuarioId,
+        valor: glucemia.valor,
+        fecha: glucemia.fecha,
+        postprandial: glucemia.postprandial,
+        alerta: getNivelAlerta(glucemia.valor, valoresCriticosMedicion),
+      }));
+    }
   }
 
   await Promise.all(resultados);
@@ -259,6 +280,32 @@ routerMCV.delete('/:id', async (req, res) => {
   return res.status(202).send({
     ok: true,
     medicion,
+  });
+});
+
+routerMCV.get('/alertas', async (req, res) => {
+  const { fecha } = req.query;
+
+  if (!fechaEsValida(fecha)) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'La fecha introducida no es válida. El formato debe ser DD/MM/YYYY',
+      },
+    });
+  }
+
+  const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
+
+  const alertas = await MedicionConstanteVital.find({
+    usuario: req.usuarioId,
+    fecha: { $gt: minFecha, $lt: maxFecha },
+    alerta: { $gt: 0 },
+  });
+
+  return res.status(200).send({
+    ok: true,
+    alertas,
   });
 });
 
