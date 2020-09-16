@@ -65,17 +65,35 @@ routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
 });
 
 routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
-  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  let mediciones;
   const resultados = [];
+  try {
+    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  } catch (error) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: `El formato introducido no es correcto. Detalles: ${error.message}`,
+      },
+    });
+  }
+  if (!mediciones.every((medicion) => typeof medicion.valor === 'number' && typeof medicion.fecha === 'number' && typeof medicion.enReposo === 'boolean')) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'El formato introducido de las mediciones no es correcto. Todas las mediciones deben tener \'valor\' (Number), \'fecha\' en milisegundos (Number), \'enReposo\' (Boolean)',
+      },
+    });
+  }
 
-  if (valores) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'frecuenciaCardiaca', req.usuarioId);
-    for (const frecuenciaCardiaca of valores) {
+  if (mediciones) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'frecuenciaCardiaca', req.usuarioId);
+    for (const frecuenciaCardiaca of mediciones) {
       resultados.push(await FrecuenciaCardiaca.create({
         usuario: req.usuarioId,
         valor: frecuenciaCardiaca.valor,
         fecha: frecuenciaCardiaca.fecha,
-        enReposo: frecuenciaCardiaca.enReposo || false,
+        enReposo: frecuenciaCardiaca.enReposo,
         alerta: getNivelAlerta(frecuenciaCardiaca.valor, valoresCriticosMedicion),
       }));
     }
@@ -84,7 +102,7 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   await Promise.all(resultados);
   return res.status(201).send({
     ok: true,
-    valores,
+    mediciones,
   });
 });
 
@@ -111,11 +129,29 @@ routerMCV.get('/temperatura', async (req, res) => {
 });
 
 routerMCV.post('/temperatura', async (req, res) => {
-  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  let mediciones;
   const resultados = [];
-  if (valores) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'temperatura', req.usuarioId);
-    for (const temperatura of valores) {
+  try {
+    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  } catch (error) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: `El formato introducido no es correcto. Detalles: ${error.message}`,
+      },
+    });
+  }
+  if (!mediciones.every((medicion) => typeof medicion.valor === 'number' && typeof medicion.fecha === 'number')) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'El formato introducido de las mediciones no es correcto. Todas las mediciones deben tener \'valor\' (Number), \'fecha\' en milisegundos (Number)',
+      },
+    });
+  }
+  if (mediciones) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'temperatura', req.usuarioId);
+    for (const temperatura of mediciones) {
       resultados.push(await Temperatura.create({
         usuario: req.usuarioId,
         valor: temperatura.valor,
@@ -128,7 +164,7 @@ routerMCV.post('/temperatura', async (req, res) => {
   await Promise.all(resultados);
   return res.status(201).send({
     ok: true,
-    valores,
+    mediciones,
   });
 });
 
@@ -153,11 +189,29 @@ routerMCV.get('/presionArterial', async (req, res) => {
 });
 
 routerMCV.post('/presionArterial', async (req, res) => {
-  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  let mediciones;
   const resultados = [];
-  if (valores) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'presionArterial', req.usuarioId);
-    for (const presionArterial of valores) {
+  try {
+    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  } catch (error) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: `El formato introducido no es correcto. Detalles: ${error.message}`,
+      },
+    });
+  }
+  if (!mediciones.every((medicion) => typeof medicion.valor === 'number' && typeof medicion.fecha === 'number' && typeof medicion.diastolica === 'number')) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'El formato introducido de las mediciones no es correcto. Todas las mediciones deben tener \'valor\' (Number), \'fecha\' en milisegundos (Number), \'diastolica\' (Number)',
+      },
+    });
+  }
+  if (mediciones) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'presionArterial', req.usuarioId);
+    for (const presionArterial of mediciones) {
       resultados.push(await PresionArterial.create({
         usuario: req.usuarioId,
         valor: presionArterial.valor,
@@ -174,7 +228,7 @@ routerMCV.post('/presionArterial', async (req, res) => {
   await Promise.all(resultados);
   return res.status(201).send({
     ok: true,
-    valores,
+    mediciones,
   });
 });
 
@@ -201,11 +255,29 @@ routerMCV.get('/glucemia', async (req, res) => {
 });
 
 routerMCV.post('/glucemia', async (req, res) => {
-  const valores = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  let mediciones;
   const resultados = [];
-  if (valores) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(valores[0], 'glucemia', req.usuarioId);
-    for (const glucemia of valores) {
+  try {
+    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+  } catch (error) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: `El formato introducido no es correcto. Detalles: ${error.message}`,
+      },
+    });
+  }
+  if (!mediciones.every((medicion) => typeof medicion.valor === 'number' && typeof medicion.fecha === 'number' && typeof medicion.postprandial === 'boolean')) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: 'El formato introducido de las mediciones no es correcto. Todas las mediciones deben tener \'valor\' (Number), \'fecha\' en milisegundos (Number), \'postprandial\' (Boolean)',
+      },
+    });
+  }
+  if (mediciones) {
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'glucemia', req.usuarioId);
+    for (const glucemia of mediciones) {
       resultados.push(await Glucemia.create({
         usuario: req.usuarioId,
         valor: glucemia.valor,
@@ -219,7 +291,7 @@ routerMCV.post('/glucemia', async (req, res) => {
   await Promise.all(resultados);
   return res.status(201).send({
     ok: true,
-    valores,
+    mediciones,
   });
 });
 
@@ -271,15 +343,6 @@ routerMCV.delete('/', async (req, res) => {
 
   return res.status(200).send({
     ok: true,
-  });
-});
-
-routerMCV.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  const medicion = await MedicionConstanteVital.findByIdAndDelete(id);
-  return res.status(202).send({
-    ok: true,
-    medicion,
   });
 });
 
