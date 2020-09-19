@@ -15,7 +15,6 @@ const GlucemiaBluetooth = (props) => {
   const handleCaracteristicaGlucemia = async (caracteristica) => {
     if (caracteristica === null) {
       const glucemia = 'Desconocida';
-      console.log('Glucemia: ', glucemia);
       return glucemia;
     }
 

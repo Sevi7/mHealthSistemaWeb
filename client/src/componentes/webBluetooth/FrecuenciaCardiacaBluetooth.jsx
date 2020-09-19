@@ -42,12 +42,9 @@ const FrecuenciaCardiacaBluetooth = (props) => {
         const zonaCuerpoInt = await zonaCuerpoData.getUint8(0);
         zonaCuerpoString = getZonaCuerpoString(zonaCuerpoInt);
       } catch (error) {
-        console.log(error);
         zonaCuerpoString = 'Desconocida';
       }
     }
-
-    console.log('Zona Cuerpo: ', zonaCuerpoString);
     return zonaCuerpoString;
   };
 

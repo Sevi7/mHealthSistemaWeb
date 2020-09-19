@@ -25,4 +25,8 @@ export default {
     const res = await axios.delete(`/medicionConstanteVital?constanteVital=${constanteVital}&fecha=${fecha}`);
     return res.data;
   },
+  getAlertas: async (fecha) => {
+    const res = await axios.get(`/medicionConstanteVital/alertas?fecha=${fecha}`);
+    return res.data;
+  },
 };

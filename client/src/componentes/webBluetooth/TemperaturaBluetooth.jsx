@@ -20,7 +20,6 @@ const TemperaturaBluetooth = (props) => {
     }
 
     const temperaturaData = await caracteristica.readValue();
-    console.log('data: ', temperaturaData);
 
     try {
       const flags = temperaturaData.getUint8(0);

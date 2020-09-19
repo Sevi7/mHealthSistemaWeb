@@ -19,7 +19,7 @@ routerMCV.use(middleware.comprobarToken);
 
 const añadirCeroCuandoMenorADiez = (tiempo) => (tiempo < 10 ? `0${tiempo}` : tiempo);
 
-const formatearFecha = (fecha) => {
+const getHoraMinSeg = (fecha) => {
   const fechaObjeto = new Date(fecha);
   return añadirCeroCuandoMenorADiez(fechaObjeto.getHours())
     + ':' + añadirCeroCuandoMenorADiez(fechaObjeto.getMinutes())
@@ -59,7 +59,10 @@ routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, fecha: formatearFecha(medicion.fecha), enReposo: medicion.enReposo,
+    valor: medicion.valor,
+    fecha: getHoraMinSeg(medicion.fecha),
+    enReposo: medicion.enReposo,
+    alerta: medicion.alerta,
   }));
   return res.status(200).send(mediciones);
 });
@@ -123,7 +126,7 @@ routerMCV.get('/temperatura', async (req, res) => {
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, fecha: formatearFecha(medicion.fecha),
+    valor: medicion.valor, fecha: getHoraMinSeg(medicion.fecha),
   }));
   return res.status(200).send(mediciones);
 });
@@ -183,7 +186,7 @@ routerMCV.get('/presionArterial', async (req, res) => {
     usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
-    valor: medicion.valor, diastolica: medicion.diastolica, fecha: formatearFecha(medicion.fecha),
+    valor: medicion.valor, diastolica: medicion.diastolica, fecha: getHoraMinSeg(medicion.fecha),
   }));
   return res.status(200).send(mediciones);
 });
@@ -248,7 +251,7 @@ routerMCV.get('/glucemia', async (req, res) => {
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor,
-    fecha: formatearFecha(medicion.fecha),
+    fecha: getHoraMinSeg(medicion.fecha),
     postprandial: medicion.postprandial,
   }));
   return res.status(200).send(mediciones);
@@ -360,16 +363,23 @@ routerMCV.get('/alertas', async (req, res) => {
 
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
 
-  const alertas = await MedicionConstanteVital.find({
+  const medicionesConAlerta = await MedicionConstanteVital.find({
     usuario: req.usuarioId,
     fecha: { $gt: minFecha, $lt: maxFecha },
     alerta: { $gt: 0 },
   });
 
-  return res.status(200).send({
-    ok: true,
-    alertas,
-  });
+  const alertas = medicionesConAlerta.map((medicionConAlerta) => ({
+    tipoConstanteVital: medicionConAlerta.tipoConstanteVital,
+    valor: medicionConAlerta.valor,
+    fecha: getHoraMinSeg(medicionConAlerta.fecha),
+    enReposo: medicionConAlerta.enReposo,
+    postprandial: medicionConAlerta.postprandial,
+    diastolica: medicionConAlerta.diastolica,
+    alerta: medicionConAlerta.alerta,
+  }));
+
+  return res.status(200).send(alertas);
 });
 
 module.exports = routerMCV;

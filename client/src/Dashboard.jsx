@@ -17,7 +17,6 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import BluetoothIcon from '@material-ui/icons/Bluetooth';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -28,7 +27,6 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -40,6 +38,7 @@ import moment from 'moment';
 import MomentUtils from '@date-io/moment';
 import PropTypes from 'prop-types';
 import GraficoSpline from './componentes/GraficoSpline.jsx';
+import AlertasPopover from './componentes/AlertasPopover.jsx';
 import FrecuenciaCardiacaBluetooth from './componentes/webBluetooth/FrecuenciaCardiacaBluetooth.jsx';
 import TemperaturaBluetooth from './componentes/webBluetooth/TemperaturaBluetooth.jsx';
 import PresionArterialBluetooth from './componentes/webBluetooth/PresionArterialBluetooth.jsx';
@@ -443,11 +442,7 @@ const Dashboard = (props) => {
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             {titulo}
           </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={0} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          <AlertasPopover fechaAlertas={fechaMediciones} />
         </Toolbar>
       </AppBar>
       <Drawer
