@@ -44,6 +44,7 @@ const fechaEsValida = (fecha) => {
 
 routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
   const { fecha } = req.query;
+  const { usuarioId } = req;
 
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
@@ -56,7 +57,7 @@ routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
 
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
   let mediciones = await FrecuenciaCardiaca.find({
-    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+    usuario: usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor,
@@ -68,10 +69,13 @@ routerMCV.get('/frecuenciaCardiaca', async (req, res) => {
 });
 
 routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
+  const { valores } = req.body;
+  const { usuarioId } = req;
   let mediciones;
   const resultados = [];
+
   try {
-    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+    mediciones = typeof valores === 'string' ? JSON.parse(valores) : valores;
   } catch (error) {
     return res.status(400).json({
       ok: false,
@@ -90,10 +94,10 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
   }
 
   if (mediciones) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'frecuenciaCardiaca', req.usuarioId);
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'frecuenciaCardiaca', usuarioId);
     for (const frecuenciaCardiaca of mediciones) {
       resultados.push(await FrecuenciaCardiaca.create({
-        usuario: req.usuarioId,
+        usuario: usuarioId,
         valor: frecuenciaCardiaca.valor,
         fecha: frecuenciaCardiaca.fecha,
         enReposo: frecuenciaCardiaca.enReposo,
@@ -111,6 +115,7 @@ routerMCV.post('/frecuenciaCardiaca', async (req, res) => {
 
 routerMCV.get('/temperatura', async (req, res) => {
   const { fecha } = req.query;
+  const { usuarioId } = req;
 
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
@@ -123,7 +128,7 @@ routerMCV.get('/temperatura', async (req, res) => {
 
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
   let mediciones = await Temperatura.find({
-    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+    usuario: usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor, fecha: getHoraMinSeg(medicion.fecha),
@@ -132,10 +137,13 @@ routerMCV.get('/temperatura', async (req, res) => {
 });
 
 routerMCV.post('/temperatura', async (req, res) => {
+  const { valores } = req.body;
+  const { usuarioId } = req;
   let mediciones;
   const resultados = [];
+
   try {
-    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+    mediciones = typeof valores === 'string' ? JSON.parse(valores) : valores;
   } catch (error) {
     return res.status(400).json({
       ok: false,
@@ -153,10 +161,10 @@ routerMCV.post('/temperatura', async (req, res) => {
     });
   }
   if (mediciones) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'temperatura', req.usuarioId);
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'temperatura', usuarioId);
     for (const temperatura of mediciones) {
       resultados.push(await Temperatura.create({
-        usuario: req.usuarioId,
+        usuario: usuarioId,
         valor: temperatura.valor,
         fecha: temperatura.fecha,
         alerta: getNivelAlerta(temperatura.valor, valoresCriticosMedicion),
@@ -173,6 +181,8 @@ routerMCV.post('/temperatura', async (req, res) => {
 
 routerMCV.get('/presionArterial', async (req, res) => {
   const { fecha } = req.query;
+  const { usuarioId } = req;
+
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
       ok: false,
@@ -183,7 +193,7 @@ routerMCV.get('/presionArterial', async (req, res) => {
   }
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
   let mediciones = await PresionArterial.find({
-    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+    usuario: usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor, diastolica: medicion.diastolica, fecha: getHoraMinSeg(medicion.fecha),
@@ -192,10 +202,13 @@ routerMCV.get('/presionArterial', async (req, res) => {
 });
 
 routerMCV.post('/presionArterial', async (req, res) => {
+  const { valores } = req.body;
+  const { usuarioId } = req;
   let mediciones;
   const resultados = [];
+
   try {
-    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+    mediciones = typeof valores === 'string' ? JSON.parse(valores) : valores;
   } catch (error) {
     return res.status(400).json({
       ok: false,
@@ -213,10 +226,10 @@ routerMCV.post('/presionArterial', async (req, res) => {
     });
   }
   if (mediciones) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'presionArterial', req.usuarioId);
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'presionArterial', usuarioId);
     for (const presionArterial of mediciones) {
       resultados.push(await PresionArterial.create({
-        usuario: req.usuarioId,
+        usuario: usuarioId,
         valor: presionArterial.valor,
         diastolica: presionArterial.diastolica,
         fecha: presionArterial.fecha,
@@ -237,6 +250,8 @@ routerMCV.post('/presionArterial', async (req, res) => {
 
 routerMCV.get('/glucemia', async (req, res) => {
   const { fecha } = req.query;
+  const { usuarioId } = req;
+
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
       ok: false,
@@ -247,7 +262,7 @@ routerMCV.get('/glucemia', async (req, res) => {
   }
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
   let mediciones = await Glucemia.find({
-    usuario: req.usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
+    usuario: usuarioId, fecha: { $gt: minFecha, $lt: maxFecha },
   });
   mediciones = mediciones.map((medicion) => ({
     valor: medicion.valor,
@@ -258,10 +273,12 @@ routerMCV.get('/glucemia', async (req, res) => {
 });
 
 routerMCV.post('/glucemia', async (req, res) => {
+  const { valores } = req.body;
+  const { usuarioId } = req;
   let mediciones;
   const resultados = [];
   try {
-    mediciones = typeof req.body.valores === 'string' ? JSON.parse(req.body.valores) : req.body.valores;
+    mediciones = typeof valores === 'string' ? JSON.parse(valores) : valores;
   } catch (error) {
     return res.status(400).json({
       ok: false,
@@ -279,10 +296,10 @@ routerMCV.post('/glucemia', async (req, res) => {
     });
   }
   if (mediciones) {
-    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'glucemia', req.usuarioId);
+    const valoresCriticosMedicion = await getValoresCriticosMedicion(mediciones[0], 'glucemia', usuarioId);
     for (const glucemia of mediciones) {
       resultados.push(await Glucemia.create({
-        usuario: req.usuarioId,
+        usuario: usuarioId,
         valor: glucemia.valor,
         fecha: glucemia.fecha,
         postprandial: glucemia.postprandial,
@@ -316,6 +333,7 @@ const getConstanteVitalMongoDB = (constanteVital) => {
 
 routerMCV.delete('/', async (req, res) => {
   const { fecha, constanteVital } = req.query;
+  const { usuarioId } = req;
 
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
@@ -340,7 +358,7 @@ routerMCV.delete('/', async (req, res) => {
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
 
   await constanteVitalMongoDB.deleteMany({
-    usuario: req.usuarioId,
+    usuario: usuarioId,
     fecha: { $gt: minFecha, $lt: maxFecha },
   });
 
@@ -351,6 +369,7 @@ routerMCV.delete('/', async (req, res) => {
 
 routerMCV.get('/alertas', async (req, res) => {
   const { fecha } = req.query;
+  const { usuarioId } = req;
 
   if (!fechaEsValida(fecha)) {
     return res.status(400).json({
@@ -364,7 +383,7 @@ routerMCV.get('/alertas', async (req, res) => {
   const { minFecha, maxFecha } = getFechaYSiguienteDiaEnSeg(fecha);
 
   const medicionesConAlerta = await MedicionConstanteVital.find({
-    usuario: req.usuarioId,
+    usuario: usuarioId,
     fecha: { $gt: minFecha, $lt: maxFecha },
     alerta: { $gt: 0 },
   });

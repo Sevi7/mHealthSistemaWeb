@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-bitwise */
@@ -15,12 +16,10 @@ const PresionArterialBluetooth = (props) => {
   const handleCaracteristicaPresionArterial = async (caracteristica) => {
     if (caracteristica === null) {
       const presionArterial = 'Desconocida';
-      console.log('PresionArterial: ', presionArterial);
       return presionArterial;
     }
 
     const presionArterialData = await caracteristica.readValue();
-    console.log('data: ', presionArterialData);
 
     try {
       const flags = presionArterialData.getUint8(0);
@@ -34,13 +33,11 @@ const PresionArterialBluetooth = (props) => {
         diastolica: presionArterialDiastolica,
         fecha,
       };
-      console.log('PresionArterial', presionArterialFecha);
       enviarPresionArterial(presionArterialFecha).then(null);
       return presionArterialFecha;
     } catch (error) {
       console.log(error);
       const presionArterial = 'Desconocida';
-      console.log('PresionArterial: ', presionArterial);
       return presionArterial;
     }
   };

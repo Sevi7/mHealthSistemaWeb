@@ -280,7 +280,7 @@ export default function AlertasPopover(props) {
           <Grid container spacing={3} direction="column">
             <Grid item />
             {alertas.map((alerta) => (
-              <Grid item xs={14}>
+              <Grid item xs={12} key={alerta.fecha}>
                 {formatearAlerta(alerta)}
               </Grid>
             ))}

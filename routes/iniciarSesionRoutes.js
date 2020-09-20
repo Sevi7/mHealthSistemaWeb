@@ -8,15 +8,15 @@ const config = require('../config.js');
 
 module.exports = (app) => {
   app.post('/iniciarSesion', async (req, res) => {
-    const { body } = req;
-    Usuario.findOne({ email: body.email }, (erro, usuarioDB) => {
+    const { email, contraseña } = req.body;
+    Usuario.findOne({ email }, (erro, usuarioDB) => {
       if (erro) {
         return res.status(500).json({
           ok: false,
           err: erro,
         });
       }
-      // Verifica que exista un usuario con el mail escrita por el usuario.
+
       if (!usuarioDB) {
         return res.status(400).json({
           ok: false,
@@ -25,8 +25,8 @@ module.exports = (app) => {
           },
         });
       }
-      // Valida que la contraseña escrita por el usuario, sea la almacenada en la db
-      if (!bcrypt.compareSync(body.contraseña, usuarioDB.contraseña)) {
+
+      if (!bcrypt.compareSync(contraseña, usuarioDB.contraseña)) {
         return res.status(400).json({
           ok: false,
           err: {
@@ -34,7 +34,7 @@ module.exports = (app) => {
           },
         });
       }
-      // Genera el token de autenticación
+
       const payload = {
         usuarioId: usuarioDB.id,
         expiraFecha: moment().local().add(120, 'minutes').unix(),

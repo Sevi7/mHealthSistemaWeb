@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const config = require('./config.js');
 
 require('./models/MedicionConstanteVital');
 require('./models/Usuario');
@@ -24,6 +23,4 @@ const medicionConstanteVitalRoutes = require('./routes/medicionConstanteVitalRou
 app.use('/usuario', usuarioRoutes);
 app.use('/medicionConstanteVital', medicionConstanteVitalRoutes);
 
-app.listen(config.PORT, () => {
-  console.log(`app running on port ${config.PORT}`);
-});
+module.exports = app;

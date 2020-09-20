@@ -108,7 +108,6 @@ const FrecuenciaCardiacaBluetooth = (props) => {
       fecha,
       enReposo: props.checkbox,
     };
-    console.log('Frecuencia Cardiaca', frecuenciaCardiacaFecha);
     guardarFrecuenciaCardiacaYEnviar(frecuenciaCardiacaFecha).then(null);
   };
 

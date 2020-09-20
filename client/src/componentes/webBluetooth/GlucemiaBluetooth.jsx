@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-bitwise */
@@ -19,7 +20,6 @@ const GlucemiaBluetooth = (props) => {
     }
 
     const glucemiaData = await caracteristica.readValue();
-    console.log('data: ', glucemiaData);
 
     try {
       const flags = glucemiaData.getUint8(0);
@@ -37,13 +37,11 @@ const GlucemiaBluetooth = (props) => {
         fecha,
         postprandial: props.checkbox,
       };
-      console.log('Glucemia', glucemiaFecha);
       enviarGlucemia(glucemiaFecha).then(null);
       return glucemiaFecha;
     } catch (error) {
       console.log(error);
       const glucemia = 'Desconocida';
-      console.log('Glucemia: ', glucemia);
       return glucemia;
     }
   };

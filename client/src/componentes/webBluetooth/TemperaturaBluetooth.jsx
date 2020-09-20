@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-bitwise */
@@ -15,7 +16,6 @@ const TemperaturaBluetooth = (props) => {
   const handleCaracteristicaTemperatura = async (caracteristica) => {
     if (caracteristica === null) {
       const temperatura = 'Desconocida';
-      console.log('Temperatura: ', temperatura);
       return temperatura;
     }
 
@@ -29,13 +29,11 @@ const TemperaturaBluetooth = (props) => {
         valor: temperatura,
         fecha,
       };
-      console.log('Temperatura', temperaturaFecha);
       enviarTemperatura(temperaturaFecha).then(null);
       return temperaturaFecha;
     } catch (error) {
       console.log(error);
       const temperatura = 'Desconocida';
-      console.log('Temperatura: ', temperatura);
       return temperatura;
     }
   };

@@ -157,16 +157,6 @@ export default function App() {
                   Registro Usuario
                 </Link>
               </Grid>
-              <Grid item xs={12}>
-                <Link href="#" variant="body2">
-                  Registro Personal Sanitario
-                </Link>
-              </Grid>
-              <Grid item xs={12}>
-                <Link href="#" variant="body2">
-                  He olvidado la contraseña
-                </Link>
-              </Grid>
             </Grid>
           </form>
         </div>

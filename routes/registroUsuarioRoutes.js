@@ -65,10 +65,8 @@ module.exports = (app) => {
     }
     const saltRounds = 10;
     diabetes = diabetes === 'si';
-    // En Javascript los meses son 0-11 en vez de 1-12 y el constructor es Date(YYYY/MM/DD)
     const fechaPartes = fechaNacimiento.split('/');
     fechaNacimiento = new Date(fechaPartes[2], fechaPartes[1] - 1, fechaPartes[0]);
-    // Quita el offset de la zona horaria para obtener el valor que ha introducido el usuario
     fechaNacimiento = new Date(
       fechaNacimiento.getTime() + Math.abs(fechaNacimiento.getTimezoneOffset() * 60000),
     );
@@ -101,7 +99,6 @@ module.exports = (app) => {
         });
       }
 
-      // Genera el token de autenticación
       const payload = {
         usuarioId: usuarioDB.id,
         expiraFecha: moment().local().add(120, 'minutes').unix(),

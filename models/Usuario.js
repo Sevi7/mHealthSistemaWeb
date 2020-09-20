@@ -37,7 +37,6 @@ const UsuarioSchema = new Schema({
   glucemiaPostrandialMax: Number,
   saturacionOxigenoMin: Number,
   saturacionOxigenoMax: Number,
-  medicionesConstantesVitales: [Number],
 });
 
 mongoose.model('Usuario', UsuarioSchema);
