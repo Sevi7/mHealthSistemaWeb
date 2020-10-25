@@ -1,5 +1,35 @@
 # mHealth Sistema Web
-_Sistema Web para mHealth: monitorización de actividad física y constantes vitales mediante Bluetooth_
+Sistema Web para mHealth: _monitorización de actividad física y constantes vitales mediante Bluetooth_
+
+## Funcionalidades
+
+- Sistema web capaz de monitorizar la **frecuencia cardíaca**, **temperatura**, **presión arterial** y
+**glucemia** utilizando dispositivos Bluetooth Low Energy disponibles en el mercado.
+- Considera la situación del usuario en el momento en el que realiza la medición.
+  - Si se encuentra haciendo ejercicio.
+  - Si la medición ha sido tomada después de comer.
+- Alerta al usuario de las mediciones cuyo valor se encuentra fuera del rango normal con una escala de gravedad.
+- La aplicación web es multidispositivo y multiplataforma.
+- Todos los datos son almacenados en una base de datos, pudiendo ver el usuario el histórico
+de sus mediciones.
+- Las mediciones son mostradas visualmente en una gráfica, diferenciando con una escala de
+colores aquellas que se encuentran fuera del rango normal.
+- Las mediciones pueden ser impresas o exportadas a diferentes formatos de archivo.
+- Estas funciones, menos las dos últimas, pueden ser consumidas también a través de una API
+REST.
+
+## Capturas de pantalla
+
+![Iniciar Sesion](https://raw.githubusercontent.com/Sevi7/mHealthSistemaWeb/master/screenshots/IniciarSesion.png)
+---
+![Desplegable Conectar](https://raw.githubusercontent.com/Sevi7/mHealthSistemaWeb/master/screenshots/DesplegableConectar.PNG)
+---
+![Pagina principal](https://raw.githubusercontent.com/Sevi7/mHealthSistemaWeb/master/screenshots/Calendario.PNG)
+---
+![Alertas](https://raw.githubusercontent.com/Sevi7/mHealthSistemaWeb/master/screenshots/Alertas.PNG)
+---
+![Registro Usuario validacion](https://raw.githubusercontent.com/Sevi7/mHealthSistemaWeb/master/screenshots/RegistroUsuarioError.PNG)
+
 ## Instalación
 
 Instalar **Node.js**
@@ -59,4 +89,8 @@ Puede crear dispositivos virtuales BLE de medición de constantes vitales con la
   - Servicio: Glucose
   - Característica: 0x2A18 (Glucose Measurement)
   - Properties: Read
-  - Valor (Ejemplo): 40-00-00-00-00-00-00-00-00-00-B0-53-00-00 equivale a 83 mg/dL
+  - Valor (Ejemplo): 02-00-00-00-00-00-00-00-00-00-B0-53-00-00 equivale a 83 mg/dL
+  
+## Referencias
+
+[Web Bluetooth API](https://webbluetoothcg.github.io/web-bluetooth/)
